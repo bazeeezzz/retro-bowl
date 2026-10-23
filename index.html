@@ -87,5 +87,61 @@
     <body>
         <h1>Retro Bowl</h1>
         <iframe class="game" width="960" height="540" scrolling="no" frameborder="0" allowtransparency="true" src="https://zayaruzostreetorgan.com/uploads/5/5/6/7/5567194/custom_themes/226112567625258737/files/index.html"></iframe>
+    <!-- Retro Bowl Save Manager Sidebar -->
+<div id="save-manager-sidebar" style="position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; background: rgba(0, 0, 0, 0.7); padding: 8px; border-radius: 6px; border: 1px solid #333; font-family: monospace;">
+  <button onclick="exportRetroBowlSave()" style="background: #28a745; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100px;">💾 Export Save</button>
+  <button onclick="document.getElementById('import-save-file').click()" style="background: #007bff; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100px;">📂 Import Save</button>
+  <input type="file" id="import-save-file" accept=".json" onchange="importRetroBowlSave(this)" style="display: none;">
+</div>
+
+<script>
+function exportRetroBowlSave() {
+  const saveData = {};
+  // Loop through localStorage to collect all game-related storage items
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    saveData[key] = localStorage.getItem(key);
+  }
+
+  // Create a JSON file download blob
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(saveData, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", "retro_bowl_save.json");
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importRetroBowlSave(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      
+      // Optional: Clear existing storage to prevent key mismatching conflicts
+      if (confirm("Importing this save will overwrite current game progress. Proceed?")) {
+        localStorage.clear();
+        
+        // Restore all keys to localStorage
+        Object.keys(importedData).forEach(key => {
+          localStorage.setItem(key, importedData[key]);
+        });
+        
+        alert("Save imported successfully! Reloading game...");
+        window.location.reload();
+      }
+    } catch (err) {
+      alert("Error: Invalid backup file format.");
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+</script>
+
     </body>
 </html>
